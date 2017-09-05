@@ -5,6 +5,7 @@ import com.gamefukk.capturedanimalsfighting.pokes.Furret;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 
 public class Battle
 {
@@ -12,13 +13,14 @@ public class Battle
     public Poke enemyPoke;
     public ArrayList<Poke> moveStack = new ArrayList<Poke>();
     public TypeUtil types = new TypeUtil();
+    public Random random = new Random();
 
     public Battle()
     {
-        playerPoke = new Furret(20f);
-        playerPoke.setNickname("Hero's Furret");
-        enemyPoke = new Furret(20f);
-        enemyPoke.setNickname("Evil Furret >:(");
+        playerPoke = new Furret(20);
+        playerPoke.setNickname("Hero Furret");
+        enemyPoke = new Furret(20);
+        enemyPoke.setNickname("Evil Furret");
         stackMoves();
     }
 
@@ -40,7 +42,7 @@ public class Battle
         else if(enemyPoke.spd == playerPoke.spd)
         {
             System.out.println("SPEED TIE!");
-            if((int)(Math.random() * 2) == 1)Collections.swap(moveStack,0,1);
+            if(random.nextInt(2) == 1)Collections.swap(moveStack,0,1);
             nextMove();
         }
         else
@@ -71,11 +73,12 @@ public class Battle
                 else
                 {
 
-                    float damage = calculateDamage(poke, poke.target);
+                    int damage = calculateDamage(poke, poke.target);
+                    int hpBefore = poke.target.hp;
                     poke.target.hp -= damage;
-                    System.out.println(poke.target.usedName + " took " + damage + " damage and is left on " + poke.target.hp + " hp!");
+                    System.out.println(poke.target.usedName + "'s HP: " + hpBefore + " -> " + poke.target.hp);
 
-                    if (poke.target.hp <= 0f)
+                    if (poke.target.hp <= 0)
                     {
                         System.out.println(poke.target.usedName + " fainted!");
                         poke.target.fainted = true;
@@ -90,7 +93,7 @@ public class Battle
 
     public void endTurn()
     {
-        if(playerPoke.fainted == false && enemyPoke.fainted == false)
+        if(!playerPoke.fainted && !enemyPoke.fainted)
         {
             stackMoves();
         }
@@ -106,16 +109,15 @@ public class Battle
     }
 
 
-    public float calculateDamage(Poke user,Poke target)
+    public int calculateDamage(Poke user,Poke target)
     {
-        //not including type modifier of course!
         return (int)((((2f * user.level / 5f) * user.move.power * user.atk / target.def)/50f+2f) * calculateModifier(user,target));
     }
 
     public float calculateModifier(Poke user,Poke target)
     {
         float typeModifier = types.effectiveness(user.move.type,target);
-        float randomModifier = (1f - (float)(Math.random() * 0.15));
+        float randomModifier = (1f - random.nextFloat() * 0.15f);
         float stab = (user.move.type == user.type1) || (user.move.type == user.type2) ? 1.5f : 1f;
         return typeModifier * randomModifier * stab;
     }
@@ -123,6 +125,6 @@ public class Battle
     //factor in accuracy too!
     public boolean attackMissed(Poke user)
     {
-        return user.move.accuracy/100f * user.acc/100f < (float)Math.random();
+        return user.move.accuracy/100f * user.acc/100f < random.nextFloat();
     }
 }

@@ -8,24 +8,24 @@ public class Poke
 
     public Type type1;
     public Type type2;
-    public float level;
+    public int level;
 
-    public float hp;
-    public float atk;
-    public float def;
-    public float spd;
-    public float acc;
+    public int hp;
+    public int atk;
+    public int def;
+    public int spd;
+    public int acc;
 
-    public float basehp;
-    public float baseatk;
-    public float basedef;
-    public float basespd;
+    public int basehp;
+    public int baseatk;
+    public int basedef;
+    public int basespd;
 
     public Move move;
     public Poke target;
     public boolean fainted = false;
 
-    public Poke(String name, Type type1,Type type2,float level,float basehp,float baseatk,float basedef,float basespd)
+    public Poke(String name, Type type1,Type type2,int level,int basehp,int baseatk,int basedef,int basespd)
     {
         this.name = name;
         usedName = name;
@@ -42,7 +42,7 @@ public class Poke
         atk = calculateStat(baseatk);
         def = calculateStat(basedef);
         spd = calculateStat(basespd);
-        acc = 100f;
+        acc = 100;
     }
 
     //simplified below until base structure of game set up
@@ -55,13 +55,13 @@ public class Poke
         usedName = nickname;
     }
 
-    public float calculateHP(float base)
+    public int calculateHP(int base)
     {
-        return (int)(2f * base * level / 100f)+level+10f;
+        return (int)(2f * base * level / 100f)+level+10;
     }
 
-    public float calculateStat(float base)
+    public int calculateStat(int base)
     {
-        return (int)(2f * base * level / 100f)+5f;
+        return (int)(2f * base * level / 100f)+5;
     }
 }

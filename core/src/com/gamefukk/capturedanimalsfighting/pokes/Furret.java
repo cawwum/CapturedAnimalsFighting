@@ -6,7 +6,7 @@ import com.gamefukk.capturedanimalsfighting.moves.Slam;
 
 public class Furret extends Poke
 {
-    public Furret(float level)
+    public Furret(int level)
     {
         super("Furret", Type.NORMAL,Type.NONE,level,85,76,64,90);
         move = new Slam();

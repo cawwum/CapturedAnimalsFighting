@@ -4,10 +4,10 @@ public class Move
 {
     public String name;
     public Type type;
-    public float power;
-    public float accuracy;
+    public int power;
+    public int accuracy;
 
-    public Move(String name,Type type,float power,float accuracy)
+    public Move(String name,Type type,int power,int accuracy)
     {
         this.name = name;
         this.type = type;

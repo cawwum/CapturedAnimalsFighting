@@ -7,6 +7,6 @@ public class Slam extends Move
 {
     public Slam()
     {
-        super("Slam", Type.NORMAL,80f,75f);
+        super("Slam", Type.NORMAL,80,75);
     }
 }
