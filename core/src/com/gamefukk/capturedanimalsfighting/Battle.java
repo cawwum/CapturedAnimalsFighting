@@ -2,7 +2,6 @@ package com.gamefukk.capturedanimalsfighting;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.gamefukk.capturedanimalsfighting.pokes.Furret;
 
 import java.util.ArrayList;
@@ -11,129 +10,169 @@ import java.util.Random;
 
 public class Battle extends ApplicationAdapter
 {
-    public Poke playerPokeRight;
-    public Poke playerPokeLeft;
-    public Poke enemyPokeRight;
-    public Poke enemyPokeLeft;
+    public Poke playerPokeSecond;
+    public Poke playerPokeFirst;
+    public Poke enemyPokeSecond;
+    public Poke enemyPokeFirst;
     public ArrayList<Poke> moveStack = new ArrayList<Poke>();
     public TypeUtil types = new TypeUtil();
     public Random random = new Random();
-    public boolean leftMoveReady = false;
-    public boolean rightMoveReady = false;
+    public State state = State.NO_INPUT;
 
     public Battle()
     {
-        playerPokeRight = new Furret(20);
-        playerPokeLeft = new Furret(15);
-        playerPokeRight.setNickname("Hero Furret");
-        playerPokeLeft.setNickname("Hero's Sidekick");
+        playerPokeSecond = new Furret(20);
+        playerPokeFirst = new Furret(15);
+        playerPokeSecond.setNickname("Hero Furret");
+        playerPokeFirst.setNickname("Hero's Sidekick");
 
-        enemyPokeRight = new Furret(20);
-        enemyPokeLeft = new Furret(18);
-        enemyPokeRight.setNickname("Evil Furret");
-        enemyPokeLeft.setNickname("Minion Furret");
+        enemyPokeSecond = new Furret(20);
+        enemyPokeFirst = new Furret(18);
+        enemyPokeSecond.setNickname("Evil Furret");
+        enemyPokeFirst.setNickname("Minion Furret");
 
-        selectFirstMove();
+        promptFirstMove();
     }
 
-    public void selectFirstMove()
+
+    public void promptFirstMove()
     {
-        if(!playerPokeLeft.fainted)
+        if(!playerPokeFirst.fainted)
         {
-            System.out.println("What will " + playerPokeLeft.usedName + " do?\n");
-            leftMoveReady = true;
+            System.out.println("What will " + playerPokeFirst.usedName + " do?");
+            System.out.println("< for "+playerPokeFirst.moves.get(0).name);
+            System.out.println("> for "+playerPokeFirst.moves.get(1).name+"\n");
+            state = State.FIRST_SELECTING_MOVE;
         }
         else
         {
-            selectSecondMove();
+            promptSecondMove();
         }
     }
 
-    public void selectSecondMove()
+    public void promptFirstTarget()
     {
-        if(!playerPokeRight.fainted)
+        System.out.println("Which target?");
+        System.out.println("< for "+enemyPokeFirst.usedName);
+        System.out.println("> for "+enemyPokeSecond.usedName+"\n");
+        state = State.FIRST_SELECTING_TARGET;
+    }
+
+    public void promptSecondMove()
+    {
+        if(!playerPokeSecond.fainted)
         {
-            System.out.println("What will " + playerPokeRight.usedName + " do?\n");
-            rightMoveReady = true;
+            System.out.println("What will " + playerPokeSecond.usedName + " do?");
+            System.out.println("< for "+playerPokeSecond.moves.get(0).name);
+            System.out.println("> for "+playerPokeSecond.moves.get(1).name+"\n");
+            state = State.SECOND_SELECTING_MOVE;
         }
         else
         {
             orderMoves();
         }
+    }
+
+    public void promptSecondTarget()
+    {
+        System.out.println("Which target?");
+        System.out.println("< for "+enemyPokeFirst.usedName);
+        System.out.println("> for "+enemyPokeSecond.usedName+"\n");
+        state = State.SECOND_SELECTING_TARGET;
+    }
+
+    public void selectMove(Poke poke,int moveIndex)
+    {
+        poke.usedMove = poke.moves.get(moveIndex);
+        moveStack.add(poke);
+    }
+
+    public void selectTarget(Poke poke,Poke target,Poke backupTarget)
+    {
+        poke.target = target;
+        poke.backupTarget = backupTarget;
     }
 
     public void leftReleased()
     {
-        if(leftMoveReady)
+        switch(state)
         {
-            playerPokeLeft.target = enemyPokeLeft;
-            playerPokeLeft.backupTarget = enemyPokeRight;
-            moveStack.add(playerPokeLeft);
-            leftMoveReady = false;
-            selectSecondMove();
-        }
-        else if(rightMoveReady)
-        {
-            playerPokeRight.target = enemyPokeLeft;
-            playerPokeRight.backupTarget = enemyPokeRight;
-            moveStack.add(playerPokeRight);
-            rightMoveReady = false;
-            orderMoves();
+            case FIRST_SELECTING_MOVE:
+                selectMove(playerPokeFirst,0);
+                promptFirstTarget();
+                break;
+
+            case FIRST_SELECTING_TARGET:
+                selectTarget(playerPokeFirst,enemyPokeFirst,enemyPokeSecond);
+                promptSecondMove();
+                break;
+
+            case SECOND_SELECTING_MOVE:
+                selectMove(playerPokeSecond,0);
+                promptSecondTarget();
+                break;
+
+            case SECOND_SELECTING_TARGET:
+                selectTarget(playerPokeSecond,enemyPokeFirst,enemyPokeSecond);
+                orderMoves();
+                break;
+
+            default:
+                break;
         }
     }
 
+
     public void rightReleased()
     {
-        if(leftMoveReady)
+        switch(state)
         {
-            playerPokeLeft.target = enemyPokeRight;
-            playerPokeLeft.backupTarget = enemyPokeLeft;
-            moveStack.add(playerPokeLeft);
-            leftMoveReady = false;
-            selectSecondMove();
-        }
-        else if(rightMoveReady)
-        {
-            playerPokeRight.target = enemyPokeRight;
-            playerPokeRight.backupTarget = enemyPokeLeft;
-            moveStack.add(playerPokeRight);
-            rightMoveReady = false;
-            orderMoves();
+            case FIRST_SELECTING_MOVE:
+                selectMove(playerPokeFirst,1);
+                promptFirstTarget();
+                break;
+
+            case FIRST_SELECTING_TARGET:
+                selectTarget(playerPokeFirst,enemyPokeSecond,enemyPokeFirst);
+                promptSecondMove();
+                break;
+
+            case SECOND_SELECTING_MOVE:
+                selectMove(playerPokeSecond,1);
+                promptSecondTarget();
+                break;
+
+            case SECOND_SELECTING_TARGET:
+                selectTarget(playerPokeSecond,enemyPokeSecond,enemyPokeFirst);
+                orderMoves();
+                break;
+
+            default:
+                break;
         }
     }
 
 
     public void orderMoves()
     {
-        if(!enemyPokeLeft.fainted)
+        state = State.NO_INPUT;
+
+        if(!enemyPokeFirst.fainted)
         {
-            if(random.nextInt(2) == 1)
-            {
-                enemyPokeLeft.target = playerPokeLeft;
-                enemyPokeLeft.backupTarget = playerPokeRight;
-            }
-            else
-            {
-                enemyPokeLeft.target = playerPokeRight;
-                enemyPokeLeft.backupTarget = playerPokeLeft;
-            }
-            moveStack.add(enemyPokeLeft);
+            if(random.nextInt(2) == 1)selectMove(enemyPokeFirst,0);
+            else selectMove(enemyPokeFirst,1);
+
+            if(random.nextInt(2) == 1)selectTarget(enemyPokeFirst,playerPokeFirst,playerPokeSecond);
+            else selectTarget(enemyPokeFirst,playerPokeSecond,playerPokeFirst);
         }
 
-        if(!enemyPokeRight.fainted)
+        if(!enemyPokeSecond.fainted)
         {
-            if(random.nextInt(2) == 1)
-            {
-                enemyPokeRight.target = playerPokeRight;
-                enemyPokeRight.backupTarget = playerPokeLeft;
-            }
-            else
-            {
-                enemyPokeRight.target = playerPokeLeft;
-                enemyPokeRight.backupTarget = playerPokeRight;
-            }
+            if(random.nextInt(2) == 1)selectMove(enemyPokeSecond,0);
+            else selectMove(enemyPokeSecond,1);
 
-            moveStack.add(enemyPokeRight);
+            if(random.nextInt(2) == 1)selectTarget(enemyPokeSecond,playerPokeFirst,playerPokeSecond);
+            else selectTarget(enemyPokeSecond,playerPokeSecond,playerPokeFirst);
         }
 
         for(int i=0;i<moveStack.size();i++)
@@ -156,13 +195,15 @@ public class Battle extends ApplicationAdapter
 
     public void executeTurn()
     {
+        System.out.println(" - - - - - - - - - - - - - - - - - - - \n");
+
         for(int i = moveStack.size();i>0;i--)
         {
             Poke poke = moveStack.get(i - 1);
 
             if (!poke.fainted)
             {
-                System.out.println(poke.usedName + " used " + poke.move.name + "!");
+                System.out.println(poke.usedName + " used " + poke.usedMove.name + "!");
 
                 if (poke.target.fainted)
                 {
@@ -208,10 +249,10 @@ public class Battle extends ApplicationAdapter
 
     public void endTurn()
     {
-        if((!playerPokeLeft.fainted || !playerPokeRight.fainted) && (!enemyPokeLeft.fainted || !enemyPokeRight.fainted))
+        if((!playerPokeFirst.fainted || !playerPokeSecond.fainted) && (!enemyPokeFirst.fainted || !enemyPokeSecond.fainted))
         {
             System.out.println("________________________________\n");
-            selectFirstMove();
+            promptFirstMove();
         }
         else
         {
@@ -227,20 +268,20 @@ public class Battle extends ApplicationAdapter
 
     public int calculateDamage(Poke user,Poke target)
     {
-        return (int)((((2f * user.level / 5f) * user.move.power * user.atk / target.def)/50f+2f) * calculateModifier(user,target));
+        return (int)((((2f * user.level / 5f) * user.usedMove.power * user.atk / target.def)/50f+2f) * calculateModifier(user,target));
     }
 
     public float calculateModifier(Poke user,Poke target)
     {
-        float typeModifier = types.effectiveness(user.move.type,target);
+        float typeModifier = types.effectiveness(user.usedMove.type,target);
         float randomModifier = (1f - random.nextFloat() * 0.15f);
-        float stab = (user.move.type == user.type1) || (user.move.type == user.type2) ? 1.5f : 1f;
+        float stab = (user.usedMove.type == user.type1) || (user.usedMove.type == user.type2) ? 1.5f : 1f;
         return typeModifier * randomModifier * stab;
     }
 
     //factor in accuracy too!
     public boolean attackMissed(Poke user)
     {
-        return user.move.accuracy/100f * user.acc/100f < random.nextFloat();
+        return user.usedMove.accuracy/100f * user.acc/100f < random.nextFloat();
     }
 }

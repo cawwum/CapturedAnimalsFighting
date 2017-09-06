@@ -24,6 +24,8 @@ public class Poke
     public int basespd;
 
     public Move move;
+    public ArrayList<Move> moves = new ArrayList<Move>();
+    public Move usedMove;
     public Poke target;
     public Poke backupTarget;
 
