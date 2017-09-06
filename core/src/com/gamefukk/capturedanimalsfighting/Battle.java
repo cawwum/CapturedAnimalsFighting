@@ -1,13 +1,15 @@
 package com.gamefukk.capturedanimalsfighting;
 
+import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.gamefukk.capturedanimalsfighting.pokes.Furret;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-public class Battle
+public class Battle extends ApplicationAdapter
 {
     public Poke playerPokeRight;
     public Poke playerPokeLeft;
@@ -16,6 +18,8 @@ public class Battle
     public ArrayList<Poke> moveStack = new ArrayList<Poke>();
     public TypeUtil types = new TypeUtil();
     public Random random = new Random();
+    public boolean leftMoveReady = false;
+    public boolean rightMoveReady = false;
 
     public Battle()
     {
@@ -29,76 +33,108 @@ public class Battle
         enemyPokeRight.setNickname("Evil Furret");
         enemyPokeLeft.setNickname("Minion Furret");
 
-        stackMoves();
-
+        selectFirstMove();
     }
 
-    public void stackMoves()
+    public void selectFirstMove()
     {
-        moveStack.clear();
+        if(!playerPokeLeft.fainted)
+        {
+            System.out.println("What will " + playerPokeLeft.usedName + " do?\n");
+            leftMoveReady = true;
+        }
+        else
+        {
+            selectSecondMove();
+        }
+    }
 
-        if(random.nextInt(2) == 1)
+    public void selectSecondMove()
+    {
+        if(!playerPokeRight.fainted)
+        {
+            System.out.println("What will " + playerPokeRight.usedName + " do?\n");
+            rightMoveReady = true;
+        }
+        else
+        {
+            orderMoves();
+        }
+    }
+
+    public void leftReleased()
+    {
+        if(leftMoveReady)
         {
             playerPokeLeft.target = enemyPokeLeft;
             playerPokeLeft.backupTarget = enemyPokeRight;
+            moveStack.add(playerPokeLeft);
+            leftMoveReady = false;
+            selectSecondMove();
         }
-        else
-        {
-            playerPokeLeft.target = enemyPokeRight;
-            playerPokeLeft.backupTarget = enemyPokeLeft;
-        }
-
-
-
-
-
-        if(random.nextInt(2) == 1)
+        else if(rightMoveReady)
         {
             playerPokeRight.target = enemyPokeLeft;
             playerPokeRight.backupTarget = enemyPokeRight;
+            moveStack.add(playerPokeRight);
+            rightMoveReady = false;
+            orderMoves();
         }
-        else
+    }
+
+    public void rightReleased()
+    {
+        if(leftMoveReady)
+        {
+            playerPokeLeft.target = enemyPokeRight;
+            playerPokeLeft.backupTarget = enemyPokeLeft;
+            moveStack.add(playerPokeLeft);
+            leftMoveReady = false;
+            selectSecondMove();
+        }
+        else if(rightMoveReady)
         {
             playerPokeRight.target = enemyPokeRight;
             playerPokeRight.backupTarget = enemyPokeLeft;
+            moveStack.add(playerPokeRight);
+            rightMoveReady = false;
+            orderMoves();
         }
+    }
 
 
-
-
-
-        if(random.nextInt(2) == 1)
+    public void orderMoves()
+    {
+        if(!enemyPokeLeft.fainted)
         {
-            enemyPokeLeft.target = playerPokeLeft;
-            enemyPokeLeft.backupTarget = playerPokeRight;
+            if(random.nextInt(2) == 1)
+            {
+                enemyPokeLeft.target = playerPokeLeft;
+                enemyPokeLeft.backupTarget = playerPokeRight;
+            }
+            else
+            {
+                enemyPokeLeft.target = playerPokeRight;
+                enemyPokeLeft.backupTarget = playerPokeLeft;
+            }
+            moveStack.add(enemyPokeLeft);
         }
-        else
+
+        if(!enemyPokeRight.fainted)
         {
-            enemyPokeLeft.target = playerPokeRight;
-            enemyPokeLeft.backupTarget = playerPokeLeft;
+            if(random.nextInt(2) == 1)
+            {
+                enemyPokeRight.target = playerPokeRight;
+                enemyPokeRight.backupTarget = playerPokeLeft;
+            }
+            else
+            {
+                enemyPokeRight.target = playerPokeLeft;
+                enemyPokeRight.backupTarget = playerPokeRight;
+            }
+
+            moveStack.add(enemyPokeRight);
         }
-
-
-
-
-
-        if(random.nextInt(2) == 1)
-        {
-            enemyPokeRight.target = playerPokeRight;
-            enemyPokeRight.backupTarget = playerPokeLeft;
-        }
-        else
-        {
-            enemyPokeRight.target = playerPokeLeft;
-            enemyPokeRight.backupTarget = playerPokeRight;
-        }
-
-
-
-        moveStack.add(playerPokeLeft);
-        moveStack.add(playerPokeRight);
-        moveStack.add(enemyPokeLeft);
-        moveStack.add(enemyPokeRight);
 
         for(int i=0;i<moveStack.size();i++)
         {
@@ -116,24 +152,6 @@ public class Battle
         }
 
         executeTurn();
-
-
-        /*
-        if(enemyPoke.spd > playerPoke.spd)
-        {
-            nextMove();
-        }
-        else if(enemyPoke.spd == playerPoke.spd)
-        {
-            System.out.println("SPEED TIE!");
-            if(random.nextInt(2) == 1)Collections.swap(moveStack,0,1);
-            nextMove();
-        }
-        else
-        {
-            Collections.swap(moveStack,0,1);
-            nextMove();
-        }*/
     }
 
     public void executeTurn()
@@ -193,7 +211,7 @@ public class Battle
         if((!playerPokeLeft.fainted || !playerPokeRight.fainted) && (!enemyPokeLeft.fainted || !enemyPokeRight.fainted))
         {
             System.out.println("________________________________\n");
-            stackMoves();
+            selectFirstMove();
         }
         else
         {
