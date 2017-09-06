@@ -1,5 +1,7 @@
 package com.gamefukk.capturedanimalsfighting;
 
+import java.util.ArrayList;
+
 public class Poke
 {
     public String name;
@@ -23,6 +25,9 @@ public class Poke
 
     public Move move;
     public Poke target;
+    public Poke backupTarget;
+
+    public ArrayList<Poke> targets = new ArrayList<Poke>();
     public boolean fainted = false;
 
     public Poke(String name, Type type1,Type type2,int level,int basehp,int baseatk,int basedef,int basespd)
